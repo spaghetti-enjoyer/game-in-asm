@@ -6,6 +6,15 @@ window_name:    .asciz "Pong"
 .global _main
 
 draw_ball:
+    call    _GetScreenWidth
+    movq    %rax, %rdi
+    divq    2
+    movq    %rax, %rdi
+    movq    %rax, %rsi
+    movq    $BALL_RADIUS, %rdx
+    movq    $BALL_RADIUS, %rcx
+    movq    $WHITE, %r8
+    call    _DrawRectangle
     ret
 
 draw_player:
@@ -28,11 +37,6 @@ draw_paddles:
 _main:
     pushq   %rbp
     movq    %rsp, %rbp
-
-    # Hello world!
-    # leaq    greeting(%rip), %rdi
-    # movb    $0, %al
-    # call    _printf
 
     # game window init
     movq    $WINDOW_WIDTH, %rdi

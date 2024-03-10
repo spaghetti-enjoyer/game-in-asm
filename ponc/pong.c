@@ -10,6 +10,7 @@
 #define FPS 60
 #define PADDLE_OFFSET 30
 #define BALL_BASE_SPEED_X 5
+#define DIFFICULTY 2
 #define BALL_BASE_SPEED_Y 2
 #define PADDLE_BASE_SPEED 5
 
@@ -57,7 +58,7 @@ int main()
 
         if (ballY > botY + PADDLE_HEIGHT / 2)
         {
-            botY += paddleSpeed;
+            botY += (paddleSpeed + DIFFICULTY);
         }
         if (botY > WINDOW_HEIGHT - PADDLE_HEIGHT)
         {
@@ -65,7 +66,7 @@ int main()
         }
         if (ballY < botY + PADDLE_HEIGHT / 2)
         {
-            botY -= paddleSpeed;
+            botY -= (paddleSpeed + DIFFICULTY);
         }
         if (botY < 0)
         {

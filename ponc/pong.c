@@ -79,7 +79,9 @@ int main()
 
         // player side
 
-        if (ballX < PADDLE_OFFSET + PADDLE_WIDTH && ballY > playerY && ballY < playerY + PADDLE_HEIGHT)
+        if (ballX < PADDLE_OFFSET + PADDLE_WIDTH 
+            && ballX > PADDLE_OFFSET // so that when its already behind the paddle it odesnt get reflected
+            && ballY > playerY && ballY < playerY + PADDLE_HEIGHT)
         {
             ballX = PADDLE_OFFSET + PADDLE_WIDTH;
             ballSpeedX *= -1;
@@ -88,23 +90,25 @@ int main()
         {
             scoreBot++;
             ballX = WINDOW_WIDTH / 2 - BALL_SIZE / 2;
-            ballY = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
+            // ballY = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
             ballSpeedX = 5;
             ballSpeedY = 2;
         }
 
         // computer side 
 
-        if (ballX > WINDOW_WIDTH - PADDLE_OFFSET - PADDLE_WIDTH && ballY > botY && ballY < botY + PADDLE_HEIGHT)
+        if (ballX > WINDOW_WIDTH - PADDLE_OFFSET - PADDLE_WIDTH - BALL_SIZE
+            && ballX < WINDOW_WIDTH - PADDLE_OFFSET  // so that when its already behind the paddle it odesnt get reflected
+            && ballY > botY && ballY < botY + PADDLE_HEIGHT)
         {
-            ballX = WINDOW_WIDTH - PADDLE_OFFSET - PADDLE_WIDTH;
+            ballX = WINDOW_WIDTH - PADDLE_OFFSET - PADDLE_WIDTH - BALL_SIZE;
             ballSpeedX *= -1;
         }
         if (ballX > WINDOW_WIDTH - BALL_SIZE)
         {
             scorePlayer++;
             ballX = WINDOW_WIDTH / 2 - BALL_SIZE / 2;
-            ballY = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
+            // ballY = WINDOW_HEIGHT / 2 - BALL_SIZE / 2;
             ballSpeedX = BALL_BASE_SPEED_X;
             ballSpeedY = BALL_BASE_SPEED_Y;
         }
@@ -113,7 +117,6 @@ int main()
         {
             ballSpeedY *= -1;
             ballY = 0;
-            // printf("ball y inverted: %i, speed: %i\n", ballY, ballSpeedY);
         }
         if (ballY > WINDOW_HEIGHT - BALL_SIZE)
         {
@@ -122,12 +125,10 @@ int main()
             ballSpeedY *= -1;
             ballY = WINDOW_HEIGHT - BALL_SIZE - 1;
         }
-        // printf("ball y: %i\n", ballY);
 
         BeginDrawing();
         // background and score
         ClearBackground(BLACK);
-
         char *scoreString = malloc(2 * sizeof(char));
         sprintf(scoreString, "%i", scorePlayer);
         DrawText(scoreString, WINDOW_WIDTH / 2 - 120, 30, 32, WHITE);

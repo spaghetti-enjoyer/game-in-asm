@@ -121,8 +121,10 @@ int main()
         }
         if (ballY > WINDOW_HEIGHT - BALL_SIZE)
         {
+            // kinda works but really doesnt
             ballSpeedY++;
             ballSpeedX++;
+
             ballSpeedY *= -1;
             ballY = WINDOW_HEIGHT - BALL_SIZE - 1;
         }

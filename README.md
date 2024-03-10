@@ -5,6 +5,10 @@ And then, download the raylib for x86:<br/>
 ```arch -x86_64 /usr/local/homebrew/bin/brew install raylib```
 
 ## To build
-```arch -x86_64 zsh ./build.zsh``` 
-## To run 
+```arch -x86_64 zsh ./build.sh``` 
+
+## To run assembly version
 ```./.build/bin```
+
+## To run C version
+```./.build/pong```

@@ -6,13 +6,10 @@ window_name:    .asciz "Pong"
 .global _main
 
 draw_ball:
-    call    _GetScreenWidth
-    movq    %rax, %rdi
-    divq    2
-    movq    %rax, %rdi
-    movq    %rax, %rsi
-    movq    $BALL_RADIUS, %rdx
-    movq    $BALL_RADIUS, %rcx
+    movq    $MID_X, %rdi
+    movq    $MID_Y, %rsi
+    movq    $BALL_SIZE, %rdx
+    movq    $BALL_SIZE, %rcx
     movq    $WHITE, %r8
     call    _DrawRectangle
     ret

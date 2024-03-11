@@ -50,20 +50,117 @@ _main:
 main_loop:
     # should close but doesn't
     call    _WindowShouldClose
-    cmpq    $1, %rax
-    je      end
+    cmpb    $0, %al                         # compare the first byte for boolean values
+    jne     end
 
     # logic goes here... eventually
 
-    # paddle logic
+paddle_logic:
 
     # player
 
+check_player_down:
+
+    movq    $KEY_DOWN, %rdi                 # if arrow down is pressed
+    call    _IsKeyDown
+    cmpb    $0, %al                         # again just the 1st byte
+    je      check_player_up
+
+    addq    $PADDLE_BASE_SPEED, -8(%rbp)    # move paddle downwards
+
+    cmpq    $PADDLE_MAX_Y, -8(%rbp)         # if (playerY < PADDLE_MAX_Y)
+    jl      check_player_up                 # skip next section
+                                            # check if paddle fully inside the screen
+    movq    $PADDLE_MAX_Y, -8(%rbp)         # playerY = PADDLE_MAX_Y
+
+check_player_up:
+
+    movq    $KEY_UP, %rdi                   # check if up arrow is pressed      
+    call    _IsKeyDown
+    cmpb    $0, %al
+    je      check_computer_up
+
+    subq    $PADDLE_BASE_SPEED, -8(%rbp)    # move paddle up
+
+    cmpq    $PADDLE_MIN_Y, -8(%rbp)         # check if paddle fully inside the screen
+    jg      check_computer_up
+
+    movq    $PADDLE_MIN_Y, -8(%rbp)
+
     # computer
 
-    # ball logic
+check_computer_up:
 
-    # begin rendering
+
+check_computer_down:
+
+
+ball_logic:
+
+    movq    -48(%rbp), %rax                 # ballX += ballSpeedX
+    addq    %rax, -32(%rbp)                 # at least 1 operand has to be a register
+    movq    -56(%rbp), %rax
+    addq    %rax, -40(%rbp)                 # ballY += ballSpeedY
+
+    # ball touching different surfaces
+
+player_hitting_ball:
+
+
+
+player_missing:                             # computer scores
+
+    cmpq    $BALL_MIN_X, -32(%rbp)          # if (ballX > BALL_MIN_x)
+    jg      computer_hitting_ball           # skip
+
+    movq    $BALL_MIN_X, -32(%rbp)          # ballX = BALL_MIN_X
+
+    movq    $-1, %rax                       # ballSpeedX *= -1
+    imulq   -48(%rbp), %rax                 # only works on registers :))))
+    movq    %rax, -48(%rbp)
+
+    addq    $1, -72(%rbp)                   # update computer score
+
+computer_hitting_ball:
+
+
+computer_missing:                           # player scores
+
+    cmpq    $BALL_MAX_X, -32(%rbp)          # if (ballX < BALL_MAX_X)
+    jl      ball_touching_top_wall          # skip 
+
+    movq    $BALL_MAX_X, -32(%rbp)          # ballX = BALL_MAX_X, so that it doesnt get stuck on the edge
+
+    movq    $-1, %rax                       # ballSpeedX *= -1
+    imulq   -48(%rbp), %rax                 # only works on registers :))))
+    movq    %rax, -48(%rbp)
+
+    addq    $1, -64(%rbp)                   # update player score
+
+ball_touching_top_wall:
+
+    cmpq    $BALL_MIN_Y, -40(%rbp)          # if (ballY > BALL_MIN_Y)
+    jg      ball_touching_bottom_wall       # skip
+
+    movq    $BALL_MIN_Y, -40(%rbp)          # ballY = BALL_MIN_Y
+
+    movq    $-1, %rax                       # ballSpeedY *= -1
+    imulq  -56(%rbp), %rax                  # again, only on registers :)))
+    movq    %rax, -56(%rbp)
+
+ball_touching_bottom_wall:
+
+    cmpq    $BALL_MAX_Y, -40(%rbp)          # if (ballY < BALL_MAX_Y)
+    jl      rendering                       # skip
+
+    movq    $BALL_MAX_Y, -40(%rbp)          # ballY = BALL_MAX_Y
+
+    movq    $-1, %rax                       # ballSpeedY *= -1
+    imulq   -56(%rbp), %rax                 # again, only on registers :)))
+    movq    %rax, -56(%rbp)
+
+rendering:
+
     call    _BeginDrawing
 
     # set backdrop

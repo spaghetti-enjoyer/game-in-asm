@@ -43,5 +43,9 @@
 #define BALL_MAX_Y WINDOW_HEIGHT - BALL_SIZE
 #define BALL_MIN_Y 0
 
+# sounds
+#define PING 0
+#define PONG 1
+
 # #define LIGHT_GRAY 0xFFBDBDBD
 # #define LIGHT_PURPLE 0xFFFF69B4

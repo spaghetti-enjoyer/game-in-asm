@@ -37,8 +37,10 @@ _main:
     movq    $FPS, %rdi
     call    _SetTargetFPS
 
+    call    _sound_init
+
 main_loop:
-    # should close but doesn't
+    
     call    _WindowShouldClose
     cmpb    $0, %al                         # compare the first byte for boolean values
     jne     end
@@ -141,6 +143,11 @@ player_hitting_ball:
     imulq   -48(%rbp), %rax                 # only works on registers :))))
     movq    %rax, -48(%rbp)
 
+    movq    $PING, %rdi                     # play paddle hit sound
+    call    _play_sound
+
+    # increasing ball speed
+
     incq    -48(%rbp)                       # ballSpeedX++
 
     cmpq    $BALL_MAX_SPEED_X, -48(%rbp)    # if (ballSpeedX < max ball speed x)
@@ -158,6 +165,9 @@ player_missing:                             # computer scores
     movq    $BALL_BASE_SPEED_Y, -56(%rbp)   # ballSpeedY = base y speed
 
     addq    $1, -72(%rbp)                   # update computer score
+
+    movq    $PONG, %rdi                     # goal sound
+    call    _play_sound
 
 computer_hitting_ball:
 
@@ -184,6 +194,9 @@ computer_hitting_ball:
     imulq   -48(%rbp), %rax
     movq    %rax, -48(%rbp)
 
+    movq    $PING, %rdi                     # play paddle hit sound
+    call    _play_sound
+
 computer_missing:                           # player scores
 
     cmpq    $BALL_MAX_X, -32(%rbp)          # if (ballX < BALL_MAX_X)
@@ -195,6 +208,9 @@ computer_missing:                           # player scores
 
     addq    $1, -64(%rbp)                   # update player score
 
+    movq    $PONG, %rdi                     # goal sound
+    call    _play_sound
+
 ball_touching_top_wall:
 
     cmpq    $BALL_MIN_Y, -40(%rbp)          # if (ballY > BALL_MIN_Y)
@@ -205,6 +221,11 @@ ball_touching_top_wall:
     movq    $-1, %rax                       # ballSpeedY *= -1
     imulq   -56(%rbp), %rax                 # again, only on registers :)))
     movq    %rax, -56(%rbp)
+
+    movq    $PING, %rdi                     # play wall hit sound
+    call    _play_sound
+
+    # increasing ball speed
 
     incq    -56(%rbp)                       # ballSpeedY++
 
@@ -223,6 +244,9 @@ ball_touching_bottom_wall:
     movq    $-1, %rax                       # ballSpeedY *= -1
     imulq   -56(%rbp), %rax                 
     movq    %rax, -56(%rbp)
+
+    movq    $PING, %rdi                     # play wall hit sound
+    call    _play_sound
 
 rendering:
 

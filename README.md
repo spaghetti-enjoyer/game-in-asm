@@ -1,5 +1,5 @@
 ## Pong in assembly and C
-A classic pong game implemented using functionality provided by the raylib library. When writing the project, I decided that it will be a lot easier to first write the derired code in C and then simply translate it to assembly, instead of writing everything from zero. Both versions are still in the repo, along with ample comments. At first glance, the C version of the game may look a bit "ugly", but I avoided all sorts of syntactic sugar on purpose - thanks to this, both programs are easily comparable side-by-side.
+A classic pong game implemented using functionality provided by the raylib library. When writing the project, I decided that it will be a lot easier to first write the derired code in C and then simply translate it to assembly, instead of writing everything from zero. Although, since then I have significantly refined the assembly version, both programs are still in the repo, along with ample comments. Thanks to this, both programs are easily comparable side-by-side.
 
 ## Setup on Apple silicon macs
 The project is written in x86_64 assembly and can be ran on M series macs through rosetta. To do it however, we first need to download a separate brew version for installing x86 packages: <br/>
@@ -23,3 +23,4 @@ And then, download the raylib for x86:<br/>
 - 2h to write ball-wall interactions + some debugging of earlier issues
 - 0.5h to write paddle ai
 - 0.5h to write player-ball interaction
+- ~2h refinement

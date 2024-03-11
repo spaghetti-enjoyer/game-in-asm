@@ -10,16 +10,6 @@ window_name:    .asciz "Pong"
 
 .global _main
 
-
-draw_player:
-    movq    $30, %rdi                       # x coordinate
-    movq    $10, %rsi                       # y coordinate
-    movq    $PADDLE_WIDTH, %rdx
-    movq    $PADDLE_HEIGHT, %rcx
-    movq    $WHITE, %r8
-    call    _DrawRectangle 
-    ret
-
 _main:
     pushq   %rbp
     movq    %rsp, %rbp
@@ -37,7 +27,6 @@ _main:
     movq    $BALL_BASE_SPEED_Y, -56(%rbp)   # ballSpeedY
     movq    $0, -64(%rbp)                   # scorePlayer
     movq    $0, -72(%rbp)                   # scoreComputer
-
 
     # game window init
     movq    $WINDOW_WIDTH, %rdi
@@ -155,20 +144,18 @@ player_hitting_ball:
     incq    -48(%rbp)                       # ballSpeedX++
 
     cmpq    $BALL_MAX_SPEED_X, -48(%rbp)    # if (ballSpeedX < max ball speed x)
-    jl      player_missing
+    jl      player_missing                  # skip
 
-    movq    $BALL_MAX_SPEED_X, -48(%rbp)
+    movq    $BALL_MAX_SPEED_X, -48(%rbp)    # ballSpeedX = max ball speed x
 
 player_missing:                             # computer scores
 
     cmpq    $BALL_MIN_X, -32(%rbp)          # if (ballX > BALL_MIN_x)
     jg      computer_hitting_ball           # skip
 
-    movq    $BALL_MIN_X, -32(%rbp)          # ballX = BALL_MIN_X
-
-    movq    $-1, %rax                       # ballSpeedX *= -1
-    imulq   -48(%rbp), %rax                 
-    movq    %rax, -48(%rbp)
+    movq    $BALL_DEFAULT_X, -32(%rbp)      # ballX = default x pos
+    movq    $BALL_BASE_SPEED_X, -48(%rbp)   # ballSpeedX = base x speed
+    movq    $BALL_BASE_SPEED_Y, -56(%rbp)   # ballSpeedY = base y speed
 
     addq    $1, -72(%rbp)                   # update computer score
 
@@ -202,11 +189,9 @@ computer_missing:                           # player scores
     cmpq    $BALL_MAX_X, -32(%rbp)          # if (ballX < BALL_MAX_X)
     jl      ball_touching_top_wall          # skip 
 
-    movq    $BALL_MAX_X, -32(%rbp)          # ballX = BALL_MAX_X, so that it doesnt get stuck on the edge
-
-    movq    $-1, %rax                       # ballSpeedX *= -1
-    imulq   -48(%rbp), %rax                 
-    movq    %rax, -48(%rbp)
+    movq    $BALL_DEFAULT_X, -32(%rbp)      # ballX = default x pos
+    movq    $BALL_BASE_SPEED_X, -48(%rbp)   # ballSpeedX = base x speed
+    movq    $BALL_BASE_SPEED_Y, -56(%rbp)   # ballSpeedY = base y speed
 
     addq    $1, -64(%rbp)                   # update player score
 
@@ -224,9 +209,9 @@ ball_touching_top_wall:
     incq    -56(%rbp)                       # ballSpeedY++
 
     cmpq    $BALL_MAX_SPEED_Y, -56(%rbp)    # if (ballSpeedY < max ball speed Y)
-    jl      ball_touching_bottom_wall
+    jl      ball_touching_bottom_wall       # skip
 
-    movq    $BALL_MAX_SPEED_Y, -56(%rbp)
+    movq    $BALL_MAX_SPEED_Y, -56(%rbp)    # if (ballSpeedY = max ball speed Y)
 
 ball_touching_bottom_wall:
 

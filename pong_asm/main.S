@@ -35,8 +35,8 @@ _main:
     movq    $BALL_DEFAULT_Y, -40(%rbp)      # ballY
     movq    $BALL_BASE_SPEED_X, -48(%rbp)   # ballSpeedX
     movq    $BALL_BASE_SPEED_Y, -56(%rbp)   # ballSpeedY
-    movq    $3, -64(%rbp)                   # scorePlayer
-    movq    $2, -72(%rbp)                   # scoreComputer
+    movq    $0, -64(%rbp)                   # scorePlayer
+    movq    $0, -72(%rbp)                   # scoreComputer
 
 
     # game window init
@@ -132,6 +132,7 @@ player_hitting_ball:
     movq    $PLAYER_RIGHT_EDGE, %rax
     cmpq    -32(%rbp), %rax                 # if right edge < ballX
     jl      player_missing                  # skip
+
     movq    $PLAYER_LEFT_EDGE, %rax
     cmpq    -32(%rbp), %rax                 # if left edge > ballX
     jg      player_missing                  # skip
@@ -151,6 +152,13 @@ player_hitting_ball:
     imulq   -48(%rbp), %rax                 # only works on registers :))))
     movq    %rax, -48(%rbp)
 
+    incq    -48(%rbp)                       # ballSpeedX++
+
+    cmpq    $BALL_MAX_SPEED_X, -48(%rbp)    # if (ballSpeedX < max ball speed x)
+    jl      player_missing
+
+    movq    $BALL_MAX_SPEED_X, -48(%rbp)
+
 player_missing:                             # computer scores
 
     cmpq    $BALL_MIN_X, -32(%rbp)          # if (ballX > BALL_MIN_x)
@@ -166,6 +174,28 @@ player_missing:                             # computer scores
 
 computer_hitting_ball:
 
+    movq    $OPPONENT_LEFT_EDGE, %rax
+    cmpq    -32(%rbp), %rax                 # if left edge > ballX
+    jg      computer_missing                # skip
+
+    movq    $OPPONENT_RIGHT_EDGE, %rax
+    cmpq    -32(%rbp), %rax                 # if right edge < ballX
+    jl      computer_missing                # skip
+
+    movq    -16(%rbp), %rax
+    cmpq    -40(%rbp), %rax                 # if top edge > ballY
+    jg      computer_missing                # skip
+
+    movq    -16(%rbp), %rax
+    addq    $PADDLE_HEIGHT, %rax
+    cmpq    -40(%rbp), %rax                 # if bottom edge < ballY
+    jl      computer_missing                # skip
+
+    movq    $OPPONENT_LEFT_EDGE, -32(%rbp)  # so that it doesnt clip on the edge
+
+    movq    $-1, %rax                       # ballSpeedX *= -1
+    imulq   -48(%rbp), %rax
+    movq    %rax, -48(%rbp)
 
 computer_missing:                           # player scores
 
@@ -188,8 +218,15 @@ ball_touching_top_wall:
     movq    $BALL_MIN_Y, -40(%rbp)          # ballY = BALL_MIN_Y
 
     movq    $-1, %rax                       # ballSpeedY *= -1
-    imulq  -56(%rbp), %rax                  # again, only on registers :)))
+    imulq   -56(%rbp), %rax                 # again, only on registers :)))
     movq    %rax, -56(%rbp)
+
+    incq    -56(%rbp)                       # ballSpeedY++
+
+    cmpq    $BALL_MAX_SPEED_Y, -56(%rbp)    # if (ballSpeedY < max ball speed Y)
+    jl      ball_touching_bottom_wall
+
+    movq    $BALL_MAX_SPEED_Y, -56(%rbp)
 
 ball_touching_bottom_wall:
 

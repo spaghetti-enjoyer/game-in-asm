@@ -20,3 +20,4 @@ And then, download the raylib for x86:<br/>
 - 1h to set up the repo
 - 2h to write the whole thing in C
 - 2h to write window and display functions
+- 2h to write ball-wall interactions + some debugging of earlier issues

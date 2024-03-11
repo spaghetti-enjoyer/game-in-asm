@@ -25,11 +25,12 @@ _main:
     movq    %rsp, %rbp
 
     # need to reserve space for 9 vars (so 10 coz stack alignment)
+    # actually only needed 8 ;-;
 
     subq    $80, %rsp                       # 8 * 9 = 72 (+ 8) = 80 % 16 = 0
     movq    $PADDLE_DEFAULT_POS, -8(%rbp)   # playerY
-    movq    $PADDLE_DEFAULT_POS, -16(%rbp)  # botY
-    movq    $PADDLE_BASE_SPEED, -24(%rbp)   # paddleSpeed
+    movq    $PADDLE_DEFAULT_POS, -16(%rbp)  # computerY
+    # movq  $1234, -24(%rbp)                # oopsie
     movq    $BALL_DEFAULT_X, -32(%rbp)      # ballX
     movq    $BALL_DEFAULT_Y, -40(%rbp)      # ballY
     movq    $BALL_BASE_SPEED_X, -48(%rbp)   # ballSpeedX
@@ -66,7 +67,7 @@ check_player_down:
     cmpb    $0, %al                         # again just the 1st byte
     je      check_player_up
 
-    addq    $PADDLE_BASE_SPEED, -8(%rbp)    # move paddle downwards
+    addq    $PLAYER_SPEED, -8(%rbp)         # move paddle downwards
 
     cmpq    $PADDLE_MAX_Y, -8(%rbp)         # if (playerY < PADDLE_MAX_Y)
     jl      check_player_up                 # skip next section
@@ -78,22 +79,44 @@ check_player_up:
     movq    $KEY_UP, %rdi                   # check if up arrow is pressed      
     call    _IsKeyDown
     cmpb    $0, %al
-    je      check_computer_up
+    je      check_computer_down
 
-    subq    $PADDLE_BASE_SPEED, -8(%rbp)    # move paddle up
+    subq    $PLAYER_SPEED, -8(%rbp)         # move paddle up
 
     cmpq    $PADDLE_MIN_Y, -8(%rbp)         # check if paddle fully inside the screen
-    jg      check_computer_up
+    jg      check_computer_down
 
-    movq    $PADDLE_MIN_Y, -8(%rbp)
+    movq    $PADDLE_MIN_Y, -8(%rbp)         # playerY = PADDLE_MIN_Y
 
     # computer
 
-check_computer_up:
-
-
 check_computer_down:
 
+    movq    -16(%rbp), %rax                 # only on registers :)))
+    addq    $PADDLE_HALF, %rax              # so that the middle of the paddle locks onto the ball
+    cmpq    -40(%rbp), %rax                 # if (computerY_mid > ballY)
+    jg      check_computer_up               # skip
+
+    addq    $OPPONENT_SPEED, -16(%rbp)      # move computer down
+
+    cmpq    $PADDLE_MAX_Y, -16(%rbp)        # if (paddleY < PADDLE_MAX_Y)
+    jl      check_computer_up               # skip
+
+    movq    $PADDLE_MAX_Y, -16(%rbp)        # computerY = PADDLE_MAX_Y
+
+check_computer_up:
+
+    movq    -16(%rbp), %rax                 # same as above
+    addq    $PADDLE_HALF, %rax              
+    cmpq    -40(%rbp), %rax                 # if (computerY_mid < ballY)
+    jl      ball_logic                      # skip
+
+    subq    $OPPONENT_SPEED, -16(%rbp)      # move computer up
+
+    cmpq    $PADDLE_MIN_Y, -16(%rbp)        # if (computerY > PADDLE_MIN_Y)
+    jg      ball_logic                      # skip
+
+    movq    $PADDLE_MIN_Y, -16(%rbp)        # computerY = PADDLE_MIN_Y
 
 ball_logic:
 

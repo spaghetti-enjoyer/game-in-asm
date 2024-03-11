@@ -129,7 +129,27 @@ ball_logic:
 
 player_hitting_ball:
 
+    movq    $PLAYER_RIGHT_EDGE, %rax
+    cmpq    -32(%rbp), %rax                 # if right edge < ballX
+    jl      player_missing                  # skip
+    movq    $PLAYER_LEFT_EDGE, %rax
+    cmpq    -32(%rbp), %rax                 # if left edge > ballX
+    jg      player_missing                  # skip
 
+    movq    -8(%rbp), %rax
+    cmpq    -40(%rbp), %rax                 # if top edge > ballY
+    jg      player_missing                  # skip
+
+    movq    -8(%rbp), %rax
+    addq    $PADDLE_HEIGHT, %rax
+    cmpq    -40(%rbp), %rax                 # if bottom edge < ballY
+    jl      player_missing                  # skip
+
+    movq    $PLAYER_RIGHT_EDGE, -32(%rbp)   # so that it doesnt clip on the edge
+
+    movq    $-1, %rax                       # ballSpeedX *= -1
+    imulq   -48(%rbp), %rax                 # only works on registers :))))
+    movq    %rax, -48(%rbp)
 
 player_missing:                             # computer scores
 
@@ -139,7 +159,7 @@ player_missing:                             # computer scores
     movq    $BALL_MIN_X, -32(%rbp)          # ballX = BALL_MIN_X
 
     movq    $-1, %rax                       # ballSpeedX *= -1
-    imulq   -48(%rbp), %rax                 # only works on registers :))))
+    imulq   -48(%rbp), %rax                 
     movq    %rax, -48(%rbp)
 
     addq    $1, -72(%rbp)                   # update computer score
@@ -155,7 +175,7 @@ computer_missing:                           # player scores
     movq    $BALL_MAX_X, -32(%rbp)          # ballX = BALL_MAX_X, so that it doesnt get stuck on the edge
 
     movq    $-1, %rax                       # ballSpeedX *= -1
-    imulq   -48(%rbp), %rax                 # only works on registers :))))
+    imulq   -48(%rbp), %rax                 
     movq    %rax, -48(%rbp)
 
     addq    $1, -64(%rbp)                   # update player score
@@ -179,7 +199,7 @@ ball_touching_bottom_wall:
     movq    $BALL_MAX_Y, -40(%rbp)          # ballY = BALL_MAX_Y
 
     movq    $-1, %rax                       # ballSpeedY *= -1
-    imulq   -56(%rbp), %rax                 # again, only on registers :)))
+    imulq   -56(%rbp), %rax                 
     movq    %rax, -56(%rbp)
 
 rendering:

@@ -21,3 +21,5 @@ And then, download the raylib for x86:<br/>
 - 2h to write the whole thing in C
 - 2h to write window and display functions
 - 2h to write ball-wall interactions + some debugging of earlier issues
+- 0.5h to write paddle ai
+- 0.5h to write player-ball interaction

@@ -7,6 +7,8 @@ score_fmt:     .asciz "%d"                  # ugly but works
 
 window_name:                .asciz "Pong" 
 menu_title:                 .asciz "pong"
+singleplayer_prompt:        .asciz "[S] 1 player"
+multiplayer_prompt:         .asciz "[M] 2 players"
 back_to_menu_prompt:        .asciz "[Q] Go back to menu"
 difficulty_selector_prompt: .asciz "[1 - 5] Choose difficulty"
 
@@ -70,7 +72,21 @@ menu_loop:
     movq    $60, %rdx
     movq    $96, %rcx
     movq    $WHITE, %r8
-    call    _DrawText                       # DrawText(score, WINDOW_WIDTH / 2 - 120, 30, 32, WHITE)
+    call    _DrawText                       
+
+    leaq    singleplayer_prompt(%rip), %rdi 
+    movq    $OFFSET, %rsi
+    movq    $WINDOW_HEIGHT - OFFSET * 4, %rdx
+    movq    $32, %rcx
+    movq    $WHITE, %r8
+    call    _DrawText 
+
+    leaq    multiplayer_prompt(%rip), %rdi 
+    movq    $OFFSET, %rsi
+    movq    $WINDOW_HEIGHT - OFFSET * 2, %rdx
+    movq    $32, %rcx
+    movq    $WHITE, %r8
+    call    _DrawText 
 
     call    _EndDrawing
     jmp     menu_loop
@@ -78,7 +94,11 @@ menu_loop:
 singleplayer_init:
     movq    $SINGLEPLAYER, -80(%rbp)        # set the value to later render computer controlled paddle only
     
-choose_difficulty:
+choose_difficulty_loop:
+    call    _WindowShouldClose              # exit the game
+    cmpb    $0, %al                         # compare the first byte for boolean values
+    jne     end
+
     movq    $KEY_1, %rdi                    # easy
     call    _IsKeyDown
     cmpb    $0, %al
@@ -118,13 +138,13 @@ choose_difficulty:
 
     leaq    difficulty_selector_prompt(%rip), %rdi 
     movq    $OFFSET, %rsi
-    movq    $OFFSET, %rdx
-    movq    $16, %rcx
+    movq    $WINDOW_HEIGHT - OFFSET * 2, %rdx
+    movq    $32, %rcx
     movq    $WHITE, %r8
-    call    _DrawText                       # DrawText(score, WINDOW_WIDTH / 2 - 120, 30, 32, WHITE)
+    call    _DrawText                       
 
     call    _EndDrawing
-    jmp     choose_difficulty
+    jmp     choose_difficulty_loop
 
 difficulty_1:
     addq    $1, -24(%rbp)

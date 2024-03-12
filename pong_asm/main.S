@@ -5,10 +5,10 @@ score_fmt:     .asciz "%d"                  # ugly but works
 
 .text
 
-# number:         .asciz "%d\n"
-# greeting:       .asciz "Hello world!\n"
-window_name:    .asciz "Pong" 
-menu_title:     .asciz "pong"
+window_name:                .asciz "Pong" 
+menu_title:                 .asciz "pong"
+back_to_menu_prompt:        .asciz "[Q] Go back to menu"
+difficulty_selector_prompt: .asciz "[1 - 5] Choose difficulty"
 
 .global _main
 
@@ -17,18 +17,7 @@ _main:
     movq    %rsp, %rbp
 
     # need to reserve space for 9 vars (so 10 coz stack alignment)
-
     subq    $80, %rsp                       # 8 * 9 = 72 (+ 8) = 80 % 16 = 0
-    movq    $PADDLE_DEFAULT_POS, -8(%rbp)   # playerY
-    movq    $PADDLE_DEFAULT_POS, -16(%rbp)  # computerY
-    # movq  $1234, -24(%rbp)                # difficulty
-    movq    $BALL_DEFAULT_X, -32(%rbp)      # ballX
-    movq    $BALL_DEFAULT_Y, -40(%rbp)      # ballY
-    movq    $BALL_BASE_SPEED_X, -48(%rbp)   # ballSpeedX
-    movq    $BALL_BASE_SPEED_Y, -56(%rbp)   # ballSpeedY
-    movq    $0, -64(%rbp)                   # scorePlayer
-    movq    $0, -72(%rbp)                   # scoreComputer
-    movq    $0, -80(%rbp)                   # game mode (signle/multi)
 
     # game window init
     movq    $WINDOW_WIDTH, %rdi
@@ -41,24 +30,35 @@ _main:
 
     call    _sound_init
 
+back_to_menu:
+    movq    $PADDLE_DEFAULT_POS, -8(%rbp)   # playerY
+    movq    $PADDLE_DEFAULT_POS, -16(%rbp)  # opponentY
+    movq    $PADDLE_BASE_SPEED, -24(%rbp)   # difficulty = player speed + diff parameter
+    movq    $BALL_DEFAULT_X, -32(%rbp)      # ballX
+    movq    $BALL_DEFAULT_Y, -40(%rbp)      # ballY
+    movq    $BALL_BASE_SPEED_X, -48(%rbp)   # ballSpeedX
+    movq    $BALL_BASE_SPEED_Y, -56(%rbp)   # ballSpeedY
+    movq    $0, -64(%rbp)                   # scorePlayer
+    movq    $0, -72(%rbp)                   # scoreOpponent
+    movq    $0, -80(%rbp)                   # game mode (signle/multi)
+
 menu_loop:
     
     call    _WindowShouldClose
     cmpb    $0, %al                         # compare the first byte for boolean values
     jne     end
 
-    movq    $KEY_S, %rdi                   # check for single player
+    movq    $KEY_S, %rdi                    # check for single player
     call    _IsKeyDown
     cmpb    $0, %al
     jne     singleplayer_init
 
-    movq    $KEY_W, %rdi                 # check for two players
+    movq    $KEY_M, %rdi                    # check for two players
     call    _IsKeyDown
     cmpb    $0, %al
     jne     multiplayer_init
 
     # render some menus
-
     call    _BeginDrawing
 
     # set backdrop
@@ -77,6 +77,69 @@ menu_loop:
 
 singleplayer_init:
     movq    $SINGLEPLAYER, -80(%rbp)        # set the value to later render computer controlled paddle only
+    
+choose_difficulty:
+    movq    $KEY_1, %rdi                    # easy
+    call    _IsKeyDown
+    cmpb    $0, %al
+    jne     difficulty_1
+
+    movq    $KEY_2, %rdi                    # mid
+    call    _IsKeyDown
+    cmpb    $0, %al
+    jne     difficulty_2
+
+    movq    $KEY_3, %rdi                    # hard
+    call    _IsKeyDown
+    cmpb    $0, %al
+    jne     difficulty_3
+
+    movq    $KEY_4, %rdi                    # very hard
+    call    _IsKeyDown
+    cmpb    $0, %al
+    jne     difficulty_4
+
+    movq    $KEY_5, %rdi                    # impossible
+    call    _IsKeyDown
+    cmpb    $0, %al
+    jne     difficulty_5
+
+    movq    $KEY_Q, %rdi                    # go back to menu
+    call    _IsKeyDown
+    cmpb    $0, %al
+    jne     back_to_menu
+
+    # render difficulty selector
+    call    _BeginDrawing
+
+    # set backdrop
+    movq    $BLACK, %rdi
+    call    _ClearBackground
+
+    leaq    difficulty_selector_prompt(%rip), %rdi 
+    movq    $OFFSET, %rsi
+    movq    $OFFSET, %rdx
+    movq    $16, %rcx
+    movq    $WHITE, %r8
+    call    _DrawText                       # DrawText(score, WINDOW_WIDTH / 2 - 120, 30, 32, WHITE)
+
+    call    _EndDrawing
+    jmp     choose_difficulty
+
+difficulty_1:
+    addq    $1, -24(%rbp)
+    jmp     main_loop
+difficulty_2:
+    addq    $2, -24(%rbp)
+    jmp     main_loop
+difficulty_3:
+    addq    $3, -24(%rbp)
+    jmp     main_loop
+difficulty_4:
+    addq    $4, -24(%rbp)
+    jmp     main_loop
+difficulty_5:
+    addq    $5, -24(%rbp)
     jmp     main_loop
 
 multiplayer_init:
@@ -85,9 +148,14 @@ multiplayer_init:
 
 main_loop:
     
-    call    _WindowShouldClose
+    call    _WindowShouldClose              # exit the game
     cmpb    $0, %al                         # compare the first byte for boolean values
     jne     end
+
+    movq    $KEY_Q, %rdi                    # go back to menu
+    call    _IsKeyDown
+    cmpb    $0, %al
+    jne     back_to_menu
 
     # logic goes here... eventually
 
@@ -97,7 +165,7 @@ player_logic:
 
 check_player_down:
 
-    movq    $KEY_S, %rdi                 # if arrow down is pressed
+    movq    $KEY_S, %rdi                    # if S key is pressed
     call    _IsKeyDown
     cmpb    $0, %al                         # again just the 1st byte
     je      check_player_up
@@ -111,7 +179,7 @@ check_player_down:
 
 check_player_up:
 
-    movq    $KEY_W, %rdi                   # check if up arrow is pressed      
+    movq    $KEY_W, %rdi                    # check if W key is pressed      
     call    _IsKeyDown
     cmpb    $0, %al
     je      opponent_logic
@@ -137,9 +205,11 @@ check_computer_down:
     cmpq    -40(%rbp), %rax                 # if (computerY_mid > ballY)
     jg      check_computer_up               # skip
 
-    addq    $OPPONENT_SPEED, -16(%rbp)      # move computer down
+    movq    -16(%rbp), %rax                 # computerY
+    addq    -24(%rbp), %rax                 # move computer down
+    movq    %rax, -16(%rbp)
 
-    cmpq    $PADDLE_MAX_Y, -16(%rbp)        # if (paddleY < PADDLE_MAX_Y)
+    cmpq    $PADDLE_MAX_Y, -16(%rbp)        # if (computerY < PADDLE_MAX_Y)
     jl      check_computer_up               # skip
 
     movq    $PADDLE_MAX_Y, -16(%rbp)        # computerY = PADDLE_MAX_Y
@@ -151,7 +221,9 @@ check_computer_up:
     cmpq    -40(%rbp), %rax                 # if (computerY_mid < ballY)
     jl      ball_logic                      # skip
 
-    subq    $OPPONENT_SPEED, -16(%rbp)      # move computer up
+    movq    -16(%rbp), %rax                 # computerY
+    subq    -24(%rbp), %rax                 # move computer up
+    movq    %rax, -16(%rbp)
 
     cmpq    $PADDLE_MIN_Y, -16(%rbp)        # if (computerY > PADDLE_MIN_Y)
     jg      ball_logic                      # skip
@@ -175,9 +247,9 @@ check_player2_down:
 
 check_player2_up:
 
-    movq    $KEY_UP, %rdi                   # if arrow down is pressed
+    movq    $KEY_UP, %rdi                   # if arrow up is pressed
     call    _IsKeyDown
-    cmpb    $0, %al                         # again just the 1st byte
+    cmpb    $0, %al                         
     je      ball_logic
 
     subq    $PLAYER_SPEED, -16(%rbp)        # move opponent up
@@ -237,7 +309,7 @@ player_hitting_ball:
 player_missing:                             # computer scores
 
     cmpq    $BALL_MIN_X, -32(%rbp)          # if (ballX > BALL_MIN_x)
-    jg      computer_hitting_ball           # skip
+    jg      opponent_hitting_ball           # skip
 
     movq    $BALL_DEFAULT_X, -32(%rbp)      # ballX = default x pos
     movq    $BALL_BASE_SPEED_X, -48(%rbp)   # ballSpeedX = base x speed
@@ -248,25 +320,25 @@ player_missing:                             # computer scores
     movq    $PONG, %rdi                     # goal sound
     call    _play_sound
 
-computer_hitting_ball:
+opponent_hitting_ball:
 
     movq    $OPPONENT_LEFT_EDGE, %rax
     cmpq    -32(%rbp), %rax                 # if left edge > ballX
-    jg      computer_missing                # skip
+    jg      opponent_missing                # skip
 
     movq    $OPPONENT_RIGHT_EDGE, %rax
     cmpq    -32(%rbp), %rax                 # if right edge < ballX
-    jl      computer_missing                # skip
+    jl      opponent_missing                # skip
 
     movq    -16(%rbp), %rax
     subq    $BALL_SIZE, %rax                # adjust for ball size
     cmpq    -40(%rbp), %rax                 # if top edge > ballY
-    jg      computer_missing                # skip
+    jg      opponent_missing                # skip
 
     movq    -16(%rbp), %rax
     addq    $PADDLE_HEIGHT, %rax
     cmpq    -40(%rbp), %rax                 # if bottom edge < ballY
-    jl      computer_missing                # skip
+    jl      opponent_missing                # skip
 
     movq    $OPPONENT_LEFT_EDGE, -32(%rbp)  # so that it doesnt clip on the edge
 
@@ -277,7 +349,7 @@ computer_hitting_ball:
     movq    $PING, %rdi                     # play paddle hit sound
     call    _play_sound
 
-computer_missing:                           # player scores
+opponent_missing:                           # player scores
 
     cmpq    $BALL_MAX_X, -32(%rbp)          # if (ballX < BALL_MAX_X)
     jl      ball_touching_top_wall          # skip 
@@ -336,6 +408,13 @@ rendering:
     movq    $BLACK, %rdi
     call    _ClearBackground
 
+    leaq    back_to_menu_prompt(%rip), %rdi # back to menu button
+    movq    $OFFSET, %rsi
+    movq    $OFFSET, %rdx
+    movq    $16, %rcx
+    movq    $WHITE, %r8
+    call    _DrawText 
+
     # draw scores
 
     # player
@@ -346,7 +425,7 @@ rendering:
 
     leaq    score(%rip), %rdi               # DrawText only takes strings as the 1st arg
     movq    $WINDOW_WIDTH / 2 - 120, %rsi
-    movq    $30, %rdx
+    movq    $OFFSET, %rdx
     movq    $32, %rcx
     movq    $WHITE, %r8
     call    _DrawText                       # DrawText(score, WINDOW_WIDTH / 2 - 120, 30, 32, WHITE)
@@ -359,7 +438,7 @@ rendering:
 
     leaq    score(%rip), %rdi
     movq    $WINDOW_WIDTH / 2 + 100, %rsi
-    movq    $30, %rdx
+    movq    $OFFSET, %rdx
     movq    $32, %rcx
     movq    $WHITE, %r8
     call    _DrawText                       # DrawText(score, WINDOW_WIDTH / 2 + 100, 30, 32, WHITE)
@@ -394,7 +473,6 @@ rendering:
     jmp     main_loop
 
 end:
-
     call    _CloseWindow
 
     movq    %rbp, %rsp

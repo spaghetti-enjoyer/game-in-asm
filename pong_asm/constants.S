@@ -33,6 +33,8 @@
 
 #define KEY_DOWN 264
 #define KEY_UP 265
+#define KEY_W 87
+#define KEY_S 83
 
 #define PADDLE_MAX_Y WINDOW_HEIGHT - PADDLE_HEIGHT
 #define PADDLE_MIN_Y 0
@@ -42,6 +44,9 @@
 #define BALL_MIN_X 0
 #define BALL_MAX_Y WINDOW_HEIGHT - BALL_SIZE
 #define BALL_MIN_Y 0
+
+#define SINGLEPLAYER 1
+#define MULTIPLAYER 2
 
 # sounds
 #define PING 0

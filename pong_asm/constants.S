@@ -55,6 +55,8 @@
 #define SINGLEPLAYER 1
 #define MULTIPLAYER 2
 
+#define FONT_SIZE 32
+
 # sounds
 #define PING 0
 #define PONG 1

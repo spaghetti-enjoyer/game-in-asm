@@ -18,10 +18,9 @@ _main:
     pushq   %rbp
     movq    %rsp, %rbp
 
-    # need to reserve space for 9 vars (so 10 coz stack alignment)
-    subq    $80, %rsp                       # 8 * 9 = 72 (+ 8) = 80 % 16 = 0
+    subq    $80, %rsp                       # need to reserve space for 10 variables
 
-    # game window init
+    # game window and sound init
     movq    $WINDOW_WIDTH, %rdi
     movq    $WINDOW_HEIGHT, %rsi
     leaq    window_name(%rip), %rdx
@@ -63,30 +62,29 @@ menu_loop:
     # render some menus
     call    _BeginDrawing
 
-    # set backdrop
     movq    $BLACK, %rdi
-    call    _ClearBackground
+    call    _ClearBackground                # set backdrop
 
     leaq    menu_title(%rip), %rdi          # DrawText only takes strings as the 1st arg
     movq    $WINDOW_WIDTH / 2 - 110, %rsi
     movq    $60, %rdx
     movq    $96, %rcx
     movq    $WHITE, %r8
-    call    _DrawText                       
+    call    _DrawText                       # game title pong
 
     leaq    singleplayer_prompt(%rip), %rdi 
     movq    $OFFSET, %rsi
-    movq    $WINDOW_HEIGHT - OFFSET * 4, %rdx
-    movq    $32, %rcx
+    movq    $WINDOW_HEIGHT - OFFSET * 2 - FONT_SIZE * 2, %rdx
+    movq    $FONT_SIZE, %rcx
     movq    $WHITE, %r8
-    call    _DrawText 
+    call    _DrawText                       # 1 player button
 
     leaq    multiplayer_prompt(%rip), %rdi 
     movq    $OFFSET, %rsi
     movq    $WINDOW_HEIGHT - OFFSET * 2, %rdx
-    movq    $32, %rcx
+    movq    $FONT_SIZE, %rcx
     movq    $WHITE, %r8
-    call    _DrawText 
+    call    _DrawText                       # 2 players button
 
     call    _EndDrawing
     jmp     menu_loop
@@ -132,16 +130,22 @@ choose_difficulty_loop:
     # render difficulty selector
     call    _BeginDrawing
 
-    # set backdrop
     movq    $BLACK, %rdi
-    call    _ClearBackground
+    call    _ClearBackground                # set backdrop
+
+    leaq    back_to_menu_prompt(%rip), %rdi 
+    movq    $OFFSET, %rsi
+    movq    $OFFSET, %rdx
+    movq    $FONT_SIZE / 2, %rcx
+    movq    $WHITE, %r8
+    call    _DrawText                       # back to menu button
 
     leaq    difficulty_selector_prompt(%rip), %rdi 
     movq    $OFFSET, %rsi
-    movq    $WINDOW_HEIGHT - OFFSET * 2, %rdx
-    movq    $32, %rcx
+    movq    $WINDOW_HEIGHT - OFFSET - FONT_SIZE, %rdx
+    movq    $FONT_SIZE, %rcx
     movq    $WHITE, %r8
-    call    _DrawText                       
+    call    _DrawText                       # select difficulty button
 
     call    _EndDrawing
     jmp     choose_difficulty_loop
@@ -431,7 +435,7 @@ rendering:
     leaq    back_to_menu_prompt(%rip), %rdi # back to menu button
     movq    $OFFSET, %rsi
     movq    $OFFSET, %rdx
-    movq    $16, %rcx
+    movq    $FONT_SIZE / 2, %rcx
     movq    $WHITE, %r8
     call    _DrawText 
 
@@ -446,7 +450,7 @@ rendering:
     leaq    score(%rip), %rdi               # DrawText only takes strings as the 1st arg
     movq    $WINDOW_WIDTH / 2 - 120, %rsi
     movq    $OFFSET, %rdx
-    movq    $32, %rcx
+    movq    $FONT_SIZE, %rcx
     movq    $WHITE, %r8
     call    _DrawText                       # DrawText(score, WINDOW_WIDTH / 2 - 120, 30, 32, WHITE)
 
@@ -459,7 +463,7 @@ rendering:
     leaq    score(%rip), %rdi
     movq    $WINDOW_WIDTH / 2 + 100, %rsi
     movq    $OFFSET, %rdx
-    movq    $32, %rcx
+    movq    $FONT_SIZE, %rcx
     movq    $WHITE, %r8
     call    _DrawText                       # DrawText(score, WINDOW_WIDTH / 2 + 100, 30, 32, WHITE)
 

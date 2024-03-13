@@ -67,8 +67,8 @@ menu_loop:
 
     leaq    menu_title(%rip), %rdi          # DrawText only takes strings as the 1st arg
     movq    $WINDOW_WIDTH / 2 - 110, %rsi
-    movq    $60, %rdx
-    movq    $96, %rcx
+    movq    $OFFSET * 2, %rdx
+    movq    $FONT_SIZE * 3, %rcx
     movq    $WHITE, %r8
     call    _DrawText                       # game title pong
 
@@ -91,6 +91,9 @@ menu_loop:
 
 singleplayer_init:
     movq    $SINGLEPLAYER, -80(%rbp)        # set the value to later render computer controlled paddle only
+
+    movq    $PONG, %rdi                     # menu selection sound
+    call    _play_sound
     
 choose_difficulty_loop:
     call    _WindowShouldClose              # exit the game
@@ -152,22 +155,50 @@ choose_difficulty_loop:
 
 difficulty_1:
     addq    $1, -24(%rbp)
+
+    movq    $PONG, %rdi                     # menu sound
+    call    _play_sound
+
     jmp     main_loop
+
 difficulty_2:
     addq    $2, -24(%rbp)
+
+    movq    $PONG, %rdi
+    call    _play_sound
+
     jmp     main_loop
+
 difficulty_3:
     addq    $3, -24(%rbp)
+
+    movq    $PONG, %rdi
+    call    _play_sound
+
     jmp     main_loop
+
 difficulty_4:
     addq    $4, -24(%rbp)
+
+    movq    $PONG, %rdi
+    call    _play_sound
+
     jmp     main_loop
+
 difficulty_5:
     addq    $5, -24(%rbp)
+
+    movq    $PONG, %rdi
+    call    _play_sound
+
     jmp     main_loop
 
 multiplayer_init:
     movq    $MULTIPLAYER, -80(%rbp)         # set the value to later render player controlled paddle only
+
+    movq    $PONG, %rdi                     # menu selection sound
+    call    _play_sound
+
     jmp     main_loop
 
 main_loop:

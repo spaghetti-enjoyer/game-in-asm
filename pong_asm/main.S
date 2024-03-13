@@ -29,6 +29,7 @@ _main:
     movq    $FPS, %rdi
     call    _SetTargetFPS
 
+    call    _image_init
     call    _sound_init
 
 back_to_menu:
@@ -495,15 +496,13 @@ rendering:
     # draw the ball
     movq    -32(%rbp), %rdi
     movq    -40(%rbp), %rsi
-    movq    $BALL_SIZE, %rdx
-    movq    $BALL_SIZE, %rcx
-    movq    $WHITE, %r8
-    call    _DrawRectangle                  # DrawRectangle(ballX, ballY, BALL_SIZE, BALL_SIZE, WHITE)
+    call    _draw_image                     # draw icon at ballX ballY
 
     call    _EndDrawing
     jmp     main_loop
 
 end:
+    call    _image_deinit
     call    _CloseWindow
 
     movq    %rbp, %rsp

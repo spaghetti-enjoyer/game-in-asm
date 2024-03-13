@@ -155,51 +155,27 @@ choose_difficulty_loop:
 
 difficulty_1:
     addq    $1, -24(%rbp)
-
-    movq    $PONG, %rdi                     # menu sound
-    call    _play_sound
-
-    jmp     main_loop
-
+    jmp     mode_selected
 difficulty_2:
     addq    $2, -24(%rbp)
-
-    movq    $PONG, %rdi
-    call    _play_sound
-
-    jmp     main_loop
-
+    jmp     mode_selected
 difficulty_3:
     addq    $3, -24(%rbp)
-
-    movq    $PONG, %rdi
-    call    _play_sound
-
-    jmp     main_loop
-
+    jmp     mode_selected
 difficulty_4:
     addq    $4, -24(%rbp)
-
-    movq    $PONG, %rdi
-    call    _play_sound
-
-    jmp     main_loop
-
+    jmp     mode_selected
 difficulty_5:
     addq    $5, -24(%rbp)
-
-    movq    $PONG, %rdi
-    call    _play_sound
-
-    jmp     main_loop
+    jmp     mode_selected
 
 multiplayer_init:
     movq    $MULTIPLAYER, -80(%rbp)         # set the value to later render player controlled paddle only
+    jmp     mode_selected
 
+mode_selected:
     movq    $PONG, %rdi                     # menu selection sound
     call    _play_sound
-
-    jmp     main_loop
 
 main_loop:
     

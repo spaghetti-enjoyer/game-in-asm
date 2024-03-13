@@ -4,7 +4,7 @@
 #define PADDLE_WIDTH 20
 #define PADDLE_HEIGHT 100
 #define OFFSET 30
-#define BALL_SIZE 10
+#define BALL_SIZE 50
 
 #define BLACK 0xFF000000
 #define WHITE 0xFFFFFFFF
